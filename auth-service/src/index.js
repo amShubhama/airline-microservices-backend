@@ -14,7 +14,7 @@ const prepareAndStartServer = () => {
     app.use('/api', apiRoutes);
 
     app.listen(PORT, () => {
-        console.log(`Server is started on PORT: ${PORT}`);
+        console.log(`Auth Service is running on port ${PORT}`);
         if (process.env.DB_SYNC) {
             db.sequelize.sync({ alter: true });
         }

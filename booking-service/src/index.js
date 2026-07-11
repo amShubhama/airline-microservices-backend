@@ -27,7 +27,7 @@ const setupAndStartServer = async () => {
     app.use('/api', apiRoutes);
 
     app.listen(PORT, () => {
-        console.log(`Server start on PORT ${PORT}`);
+        console.log(`Booking Service is running on port ${PORT}`);
 
         if (DB_SYNC) {
             console.log(DB_SYNC);
