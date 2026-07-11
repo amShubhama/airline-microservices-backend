@@ -12,7 +12,7 @@ const authenticateUser = async (req, res, next) => {
                 .json({ message: 'Access denied. No token provided.' });
         }
 
-        const response = await axios.get(`${USER_SERVICE}/api/v1/auth/verify`, {
+        const response = await axios.get(`${USER_SERVICE}/api/v1/verify`, {
             headers: {
                 'x-access-token': token,
             },
