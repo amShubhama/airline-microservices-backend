@@ -15,7 +15,7 @@ const setupAndStartServer = async () => {
     app.use('/api', ApiRoutes);
 
     app.listen(PORT, async () => {
-        console.log(`Server started at ${PORT}`);
+        console.log(`Flight Service is running on port ${PORT}`);
         if (process.env.DB_SYNC) {
             //db.sequelize.sync({ alter: true });
         }

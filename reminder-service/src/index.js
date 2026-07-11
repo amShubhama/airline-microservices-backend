@@ -18,7 +18,7 @@ const setupandStartServer = async () => {
     app.get('/', (req, res) => res.send('Working'));
 
     app.listen(PORT, () => {
-        console.log(`Server start at PORT ${PORT}`);
+        console.log(`Reminder Service is running on port ${PORT}`);
     })
 }
 

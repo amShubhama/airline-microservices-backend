@@ -1,0 +1,17 @@
+{
+    "name": "airline-management-microservices",
+    "private": true,
+    "workspaces": [
+        "api-gateway-service",
+        "auth-service",
+        "flights-service",
+        "booking-service",
+        "reminder-service"
+    ],
+    "scripts": {
+        "dev": "concurrently \"npm run dev --workspace=auth-service\" \"npm run dev --workspace=booking-service\" \"npm run dev --workspace=flights-service\" \"npm run dev --workspace=reminder-service\" \"npm run dev --workspace=api-gateway-service\""
+    },
+    "devDependencies": {
+        "concurrently": "^9.0.0"
+    }
+}
