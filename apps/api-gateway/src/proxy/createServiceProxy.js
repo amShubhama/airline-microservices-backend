@@ -3,14 +3,14 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 const createServiceProxy = (
     serviceName,
     target,
-    pathRewrite = {}
+    options = {}
 ) => {
     return createProxyMiddleware({
         target,
         changeOrigin: true,
-        pathRewrite,
         proxyTimeout: 10000,
         timeout: 10000,
+        ...options,
 
         on: {
             proxyReq: (proxyReq, req) => {
