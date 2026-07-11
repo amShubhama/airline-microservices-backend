@@ -4,6 +4,9 @@ const cors = require("cors")
 const morgan = require("morgan");
 const authProxy = require('./proxy/authProxy')
 const { PORT, ENV } = require('./config/serverConfig');
+const flightProxy = require("./proxy/flightProxy");
+const bookingProxy = require("./proxy/bookingProxy");
+
 
 const setupAndStartServer = async () => {
     const app = express();
@@ -25,6 +28,16 @@ const setupAndStartServer = async () => {
     });
 
     app.use("/api/v1/auth", authProxy);
+    app.use(
+        [
+            "/api/v1/flights",
+            "/api/v1/airports",
+            "/api/v1/airplanes",
+            "/api/v1/cities",
+        ],
+        flightProxy
+    );
+    app.use('/api/v1/bookings', bookingProxy)
 
     app.use((req, res) => {
         return res.status(404).json({
