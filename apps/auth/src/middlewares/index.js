@@ -3,7 +3,7 @@ const validateRequest = require('./validate-request');
 const errorHandler = require('./error-middleware');
 
 module.exports = {
-    AuthRequestValidators,
-    validateRequest,
-    errorHandler,
+  AuthRequestValidators,
+  validateRequest,
+  errorHandler,
 };
