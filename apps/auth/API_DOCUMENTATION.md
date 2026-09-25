@@ -1,4 +1,4 @@
-# 🔐 Auth Service API Documentation
+# Auth Service API Documentation
 
 The **Auth Service** manages user identity, credentials, registration, role assignments, and JSON Web Token (JWT) issuance and validation across the Airline Management microservices system.
 
@@ -9,11 +9,12 @@ The **Auth Service** manages user identity, credentials, registration, role assi
 
 ---
 
-## 📐 Standardized Response Envelope
+## Standardized Response Envelope
 
 All API endpoints return a uniform response envelope.
 
 ### Success Response Envelope (`HTTP 200 / 201`)
+
 ```json
 {
   "success": true,
@@ -24,6 +25,7 @@ All API endpoints return a uniform response envelope.
 ```
 
 ### Error Response Envelope (`HTTP 400 / 401 / 403 / 404 / 409 / 500`)
+
 ```json
 {
   "success": false,
@@ -31,16 +33,14 @@ All API endpoints return a uniform response envelope.
   "data": {},
   "error": {
     "statusCode": 400,
-    "explanation": [
-      "Field-level or system-level error explanation"
-    ]
+    "explanation": ["Field-level or system-level error explanation"]
   }
 }
 ```
 
 ---
 
-## 🚪 Endpoints Reference
+## Endpoints Reference
 
 ### 1. Register User (Sign Up)
 
@@ -51,17 +51,20 @@ Registers a new user account, validates payload via Zod, securely hashes the pas
 - **Auth Required:** No
 
 #### Request Headers
-| Header | Value | Required |
-|:---|:---|:---|
-| `Content-Type` | `application/json` | Yes |
+
+| Header         | Value              | Required |
+| :------------- | :----------------- | :------- |
+| `Content-Type` | `application/json` | Yes      |
 
 #### Request Body
-| Field | Type | Validation Rules | Description |
-|:---|:---|:---|:---|
-| `email` | `string` | Valid email format, trimmed, converted to lowercase | The user's unique email address |
-| `password` | `string` | Min 6 characters, max 100 characters | The user's plain-text password |
+
+| Field      | Type     | Validation Rules                                    | Description                     |
+| :--------- | :------- | :-------------------------------------------------- | :------------------------------ |
+| `email`    | `string` | Valid email format, trimmed, converted to lowercase | The user's unique email address |
+| `password` | `string` | Min 6 characters, max 100 characters                | The user's plain-text password  |
 
 ##### Example Request:
+
 ```json
 {
   "email": "traveler@example.com",
@@ -72,7 +75,9 @@ Registers a new user account, validates payload via Zod, securely hashes the pas
 #### Responses
 
 ##### `201 Created`
+
 Returned when the account is successfully created. Password hash is never exposed.
+
 ```json
 {
   "success": true,
@@ -94,6 +99,7 @@ Returned when the account is successfully created. Password hash is never expose
 ```
 
 ##### `400 Bad Request` (Zod Validation Error)
+
 ```json
 {
   "success": false,
@@ -110,6 +116,7 @@ Returned when the account is successfully created. Password hash is never expose
 ```
 
 ##### `409 Conflict` (Email Already Registered)
+
 ```json
 {
   "success": false,
@@ -117,9 +124,7 @@ Returned when the account is successfully created. Password hash is never expose
   "data": {},
   "error": {
     "statusCode": 409,
-    "explanation": [
-      "email must be unique"
-    ]
+    "explanation": ["email must be unique"]
   }
 }
 ```
@@ -135,17 +140,20 @@ Authenticates user credentials and returns a signed JSON Web Token (JWT) along w
 - **Auth Required:** No
 
 #### Request Headers
-| Header | Value | Required |
-|:---|:---|:---|
-| `Content-Type` | `application/json` | Yes |
+
+| Header         | Value              | Required |
+| :------------- | :----------------- | :------- |
+| `Content-Type` | `application/json` | Yes      |
 
 #### Request Body
-| Field | Type | Validation Rules | Description |
-|:---|:---|:---|:---|
-| `email` | `string` | Valid email, trimmed, lowercase | Registered email |
-| `password` | `string` | Non-empty string | Account password |
+
+| Field      | Type     | Validation Rules                | Description      |
+| :--------- | :------- | :------------------------------ | :--------------- |
+| `email`    | `string` | Valid email, trimmed, lowercase | Registered email |
+| `password` | `string` | Non-empty string                | Account password |
 
 ##### Example Request:
+
 ```json
 {
   "email": "traveler@example.com",
@@ -156,6 +164,7 @@ Authenticates user credentials and returns a signed JSON Web Token (JWT) along w
 #### Responses
 
 ##### `200 OK`
+
 ```json
 {
   "success": true,
@@ -178,6 +187,7 @@ Authenticates user credentials and returns a signed JSON Web Token (JWT) along w
 ```
 
 ##### `401 Unauthorized` (Invalid Credentials / Non-existent User)
+
 ```json
 {
   "success": false,
@@ -201,14 +211,16 @@ Used by client applications and inter-service middlewares (e.g. Booking Service)
 - **Auth Required:** Yes (`x-access-token` header OR standard `Authorization: Bearer <token>`)
 
 #### Request Headers
-| Header | Value | Required |
-|:---|:---|:---|
-| `x-access-token` | `<jwt_token>` | Either this or Authorization |
-| `Authorization` | `Bearer <jwt_token>` | Either this or x-access-token |
+
+| Header           | Value                | Required                      |
+| :--------------- | :------------------- | :---------------------------- |
+| `x-access-token` | `<jwt_token>`        | Either this or Authorization  |
+| `Authorization`  | `Bearer <jwt_token>` | Either this or x-access-token |
 
 #### Responses
 
 ##### `200 OK`
+
 ```json
 {
   "success": true,
@@ -228,6 +240,7 @@ Used by client applications and inter-service middlewares (e.g. Booking Service)
 ```
 
 ##### `401 Unauthorized` (Token Missing or Expired)
+
 ```json
 {
   "success": false,
@@ -252,12 +265,14 @@ The token must be valid and contain the `ADMIN` role, which is then double-check
 - **Auth Required:** Yes (`x-access-token` header OR standard `Authorization: Bearer <token>`)
 
 #### Request Headers
-| Header | Value | Required |
-|:---|:---|:---|
-| `x-access-token` | `<jwt_token>` | Either this or Authorization |
-| `Authorization` | `Bearer <jwt_token>` | Either this or x-access-token |
+
+| Header           | Value                | Required                      |
+| :--------------- | :------------------- | :---------------------------- |
+| `x-access-token` | `<jwt_token>`        | Either this or Authorization  |
+| `Authorization`  | `Bearer <jwt_token>` | Either this or x-access-token |
 
 #### Verification Business Logic
+
 1. **Token Presence & Format:** Request must provide a valid JWT access token in headers.
 2. **Token Authenticity:** Token signature and expiry are validated via `jwt.verify`.
 3. **Real-time Database Authorization:** Queries user role permissions directly from the database for `decoded.id` in real time, accurately reflecting promotions and revocations immediately.
@@ -265,6 +280,7 @@ The token must be valid and contain the `ADMIN` role, which is then double-check
 #### Responses
 
 ##### `200 OK` (Admin Confirmed)
+
 ```json
 {
   "success": true,
@@ -277,6 +293,7 @@ The token must be valid and contain the `ADMIN` role, which is then double-check
 ```
 
 ##### `200 OK` (Not an Admin)
+
 ```json
 {
   "success": true,
@@ -289,6 +306,7 @@ The token must be valid and contain the `ADMIN` role, which is then double-check
 ```
 
 ##### `401 Unauthorized` (Token Missing, Expired/Invalid, or User No Longer Exists)
+
 ```json
 {
   "success": false,
@@ -310,6 +328,7 @@ The token must be valid and contain the `ADMIN` role, which is then double-check
 - **Auth Required:** No
 
 #### Response: `200 OK`
+
 ```json
 {
   "status": "healthy",
