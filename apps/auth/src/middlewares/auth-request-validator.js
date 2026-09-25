@@ -13,25 +13,19 @@ const validateSignin = validateRequest(signinSchema);
  * Ensures an authentication token is present in request headers and attaches `req.token`.
  */
 const validateAuthToken = (req, res, next) => {
-    const rawToken = (req.headers['authorization'] || req.headers['x-access-token'] || '').trim();
-    const token = extractToken(rawToken);
+  const rawToken = (req.headers['authorization'] || req.headers['x-access-token'] || '').trim();
+  const token = extractToken(rawToken);
 
-    if (!token) {
-        return next(
-            new AppError(
-                MESSAGES.AUTH.TOKEN_MISSING,
-                StatusCodes.UNAUTHORIZED,
-                MESSAGES.AUTH.TOKEN_MISSING
-            )
-        );
-    }
+  if (!token) {
+    return next(new AppError(MESSAGES.AUTH.TOKEN_MISSING, StatusCodes.UNAUTHORIZED, MESSAGES.AUTH.TOKEN_MISSING));
+  }
 
-    req.token = token;
-    next();
+  req.token = token;
+  next();
 };
 
 module.exports = {
-    validateSignup,
-    validateSignin,
-    validateAuthToken,
+  validateSignup,
+  validateSignin,
+  validateAuthToken,
 };

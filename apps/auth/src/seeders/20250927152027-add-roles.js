@@ -11,25 +11,29 @@ module.exports = {
      *   name: 'John Doe',
      *   isBetaMember: false
      * }], {});
-    */
+     */
     // Add seed commands here.
-    await queryInterface.bulkInsert('Roles', [
-      {
-        role: 'ADMIN',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        role: 'CUSTOMER',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        role: 'AIRLINE_BUSINESS',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ], {});
+    await queryInterface.bulkInsert(
+      'Roles',
+      [
+        {
+          role: 'ADMIN',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          role: 'CUSTOMER',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          role: 'AIRLINE_BUSINESS',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      {},
+    );
   },
 
   async down(queryInterface, Sequelize) {
@@ -39,5 +43,5 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-  }
+  },
 };
