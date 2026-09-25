@@ -1,19 +1,33 @@
 {
-    "name": "airline-management-microservices",
-    "private": true,
-    "workspaces": [
-        "apps/*"
-    ],
-    "scripts": {
-        "dev": "concurrently -n \"gateway,auth,booking,flight,notifications\" -c \"cyan,magenta,yellow,blue,green\" \"npm run dev -w @airline/api-gateway\" \"npm run dev -w @airline/auth\" \"npm run dev -w @airline/booking\" \"npm run dev -w @airline/flight\" \"npm run dev -w @airline/notifications\"",
-        "start": "concurrently -n \"gateway,auth,booking,flight,reminder\" -c \"cyan,magenta,yellow,blue,green\" \"npm run start -w @airline/api-gateway\" \"npm run start -w @airline/auth\" \"npm run start -w @airline/booking\" \"npm run start -w @airline/flight\" \"npm run start -w @airline/notifications\"",
-        "dev:gateway": "npm run dev -w @airline/api-gateway",
-        "dev:auth": "npm run dev -w @airline/auth",
-        "dev:booking": "npm run dev -w @airline/booking",
-        "dev:flight": "npm run dev -w @airline/flight",
-        "dev:notifications": "npm run dev -w @airline/notifications"
-    },
-    "devDependencies": {
-        "concurrently": "^9.1.2"
-    }
+  "name": "airline-management-microservices",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"gateway,auth,booking,flight,notifications\" -c \"cyan,magenta,yellow,blue,green\" \"npm run dev -w @airline/api-gateway\" \"npm run dev -w @airline/auth\" \"npm run dev -w @airline/booking\" \"npm run dev -w @airline/flight\" \"npm run dev -w @airline/notifications\"",
+    "start": "concurrently -n \"gateway,auth,booking,flight,reminder\" -c \"cyan,magenta,yellow,blue,green\" \"npm run start -w @airline/api-gateway\" \"npm run start -w @airline/auth\" \"npm run start -w @airline/booking\" \"npm run start -w @airline/flight\" \"npm run start -w @airline/notifications\"",
+    "dev:gateway": "npm run dev -w @airline/api-gateway",
+    "dev:auth": "npm run dev -w @airline/auth",
+    "dev:booking": "npm run dev -w @airline/booking",
+    "dev:flight": "npm run dev -w @airline/flight",
+    "dev:notifications": "npm run dev -w @airline/notifications",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "jest",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.9"
+  }
 }
