@@ -4,23 +4,40 @@ const { AuthRequestValidators } = require('../../middlewares/index');
 
 const router = express.Router();
 
+/**
+ * @route   POST /api/v1/signup
+ */
 router.post(
     '/signup',
-    AuthRequestValidators.validateUserAuth,
+    AuthRequestValidators.validateSignup,
     UserController.create
 );
+
+/**
+ * @route   POST /api/v1/signin
+ */
 router.post(
     '/signin',
-    AuthRequestValidators.validateUserAuth,
+    AuthRequestValidators.validateSignin,
     UserController.signIn
 );
+
+/**
+ * @route   GET /api/v1/verify
+ */
 router.get(
     '/verify',
-    UserController.isAuthenticated,
+    AuthRequestValidators.validateAuthToken,
+    UserController.isAuthenticated
 );
+
+/**
+ * @route   GET /api/v1/isAdmin
+ */
 router.get(
     '/isAdmin',
-    AuthRequestValidators.validateIsAdminRequest,
+    AuthRequestValidators.validateAuthToken,
     UserController.isAdmin
-)
+);
+
 module.exports = router;

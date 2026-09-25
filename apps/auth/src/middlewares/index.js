@@ -1,3 +1,9 @@
+const AuthRequestValidators = require('./auth-request-validator');
+const validateRequest = require('./validate-request');
+const errorHandler = require('./error-middleware');
+
 module.exports = {
-    AuthRequestValidators: require('./auth-request-validator'),
+    AuthRequestValidators,
+    validateRequest,
+    errorHandler,
 };
