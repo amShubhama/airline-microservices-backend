@@ -1,7 +1,11 @@
-const UserRepository = require('../repositories/user-repository');
 const jwt = require('jsonwebtoken');
-const { JWT_KEY } = require('../config/serverConfig');
 const bcrypt = require('bcrypt');
+const { StatusCodes } = require('http-status-codes');
+
+const UserRepository = require('../repositories/user-repository');
+const { JWT_KEY, JWT_EXPIRY } = require('../config/server-config');
+const AppError = require('../utils/errors/app-error');
+const { MESSAGES } = require('../constants');
 
 class UserService {
     constructor() {
@@ -9,91 +13,135 @@ class UserService {
     }
 
     async create(data) {
-        try {
-            const user = await this.userRepository.create(data);
-            return user;
-        } catch (error) {
-            console.log('Something went wrong at the service layer');
-            throw error;
-        }
+        return await this.userRepository.create(data);
     }
 
     async signIn(email, plainPassword) {
-        try {
-            // step 1 -> fetch the user using the email
-            const user = await this.userRepository.getByEmail(email);
+        const normalizedEmail = (email || '').trim().toLowerCase();
 
-            // step 2 -> compare incoming plain password with stores encrypted password
-            const passwordsMatch = this.#checkPassword(plainPassword, user.password);
+        const user = await this.userRepository.getByEmail(normalizedEmail, true);
 
-            if (!passwordsMatch) {
-                console.log("Password doesn't match");
-                throw { error: 'Incorrect password' };
-            }
-
-            // step 3 -> if passwords match then create a token and send it to the user
-            const newJWT = this.#createToken({ email: user.email, id: user.id });
-            return newJWT;
-
-        } catch (error) {
-            console.log("Something went wrong in the sign in process", error.message);
-            throw error;
+        if (!user) {
+            throw new AppError(
+                MESSAGES.AUTH.INVALID_CREDENTIALS,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.INVALID_CREDENTIALS
+            );
         }
+
+        const isPasswordMatch = await this.#checkPassword(plainPassword, user.password);
+
+        if (!isPasswordMatch) {
+            throw new AppError(
+                MESSAGES.AUTH.INVALID_CREDENTIALS,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.INVALID_CREDENTIALS
+            );
+        }
+
+        const roles = user.Roles ? user.Roles.map((r) => r.role) : [];
+
+        const token = this.#createToken({
+            id: user.id,
+            email: user.email,
+            roles,
+        });
+
+        return {
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                Roles: user.Roles || [],
+            },
+        };
     }
 
     async isAuthenticated(token) {
-        try {
-            const response = this.#verifyToken(token);
-            if (!response) {
-                throw { error: 'Invalid token' };
-            }
-            const user = await this.userRepository.getById(response.id);
-            if (!user) {
-                throw { error: 'No user with the corressponding token exists' };
-            }
-            return user;
-        } catch (error) {
-            console.log("Something went wrong in the verifying token", error.message);
-            throw error;
+        if (!token) {
+            throw new AppError(
+                MESSAGES.AUTH.TOKEN_MISSING,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.TOKEN_MISSING
+            );
         }
+
+        const decoded = this.#verifyToken(token);
+
+        const user = await this.userRepository.getById(decoded.id);
+
+        if (!user) {
+            throw new AppError(
+                MESSAGES.AUTH.USER_NOT_FOUND,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.USER_NOT_FOUND
+            );
+        }
+
+        return user;
     }
 
-    #createToken(user) {
-        try {
-            const result = jwt.sign(user, JWT_KEY, { expiresIn: '1h' });
-            return result;
-        } catch (error) {
-            console.log('Something went wrong in token creation');
-            throw error;
+    async isAdmin(token) {
+        if (!token) {
+            throw new AppError(
+                MESSAGES.AUTH.TOKEN_MISSING,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.TOKEN_MISSING
+            );
         }
+
+        const decoded = this.#verifyToken(token);
+
+        if (!decoded || !decoded.id) {
+            throw new AppError(
+                MESSAGES.AUTH.TOKEN_INVALID,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.TOKEN_INVALID
+            );
+        }
+        
+        // Ensure user still exists in the database
+        const adminStatus = await this.userRepository.checkAdminStatus(decoded.id);
+        if (!adminStatus.userExists) {
+            throw new AppError(
+                MESSAGES.AUTH.USER_NOT_FOUND,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.USER_NOT_FOUND
+            );
+        }
+
+        return adminStatus.isAdmin;
+    }
+
+    #createToken(payload) {
+        return jwt.sign(payload, JWT_KEY, { expiresIn: JWT_EXPIRY || '1d' });
     }
 
     #verifyToken(token) {
         try {
-            const response = jwt.verify(token, JWT_KEY);
-            return response;
+            return jwt.verify(token, JWT_KEY);
         } catch (error) {
-            console.log('Something went wrong in token validation', error);
-            throw error;
+            if (error.name === 'TokenExpiredError') {
+                throw new AppError(
+                    MESSAGES.AUTH.TOKEN_EXPIRED,
+                    StatusCodes.UNAUTHORIZED,
+                    MESSAGES.AUTH.TOKEN_EXPIRED
+                );
+            }
+            throw new AppError(
+                MESSAGES.AUTH.TOKEN_INVALID,
+                StatusCodes.UNAUTHORIZED,
+                MESSAGES.AUTH.TOKEN_INVALID
+            );
         }
     }
 
-    #checkPassword(userInputPlainPassword, encryptedPassword) {
-        try {
-            return bcrypt.compareSync(userInputPlainPassword, encryptedPassword);
-        } catch (error) {
-            console.log('Something went wrong in password comparison');
-            throw error;
+    async #checkPassword(userInputPlainPassword, encryptedPassword) {
+        if (!userInputPlainPassword || !encryptedPassword) {
+            return false;
         }
-    }
-
-    isAdmin(userId) {
-        try {
-            return this.userRepository.isAdmin(userId);
-        } catch (error) {
-            console.log('Something went wrong in password comparison');
-            throw error;
-        }
+        return await bcrypt.compare(userInputPlainPassword, encryptedPassword);
     }
 }
+
 module.exports = UserService;
