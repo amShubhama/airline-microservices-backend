@@ -1,46 +1,68 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+const { SEAT_TYPE } = require('../utils/common/enums');
+const { BUSINESS, PREMIUM_ECONOMY, FIRST_CLASS, ECONOMY } = SEAT_TYPE;
 
-const { Enums } = require('../utils/common');
-const { BUSINESS, PREMIUM_ECONOMY, FIRST_CLASS, ECONOMY } = Enums.SEAT_TYPE;
 module.exports = (sequelize, DataTypes) => {
   class Seat extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
       this.belongsTo(models.Airplane, {
         foreignKey: 'airplaneId',
+        as: 'airplane',
       });
     }
   }
-  Seat.init({
-    airplaneId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+
+  Seat.init(
+    {
+      airplaneId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: true,
+        },
+      },
+      row: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          min: 1,
+        },
+      },
+      col: {
+        type: DataTypes.STRING(1),
+        allowNull: false,
+        validate: {
+          isUppercase: true,
+          len: [1, 1],
+        },
+      },
+      type: {
+        type: DataTypes.ENUM,
+        values: [BUSINESS, ECONOMY, PREMIUM_ECONOMY, FIRST_CLASS],
+        defaultValue: ECONOMY,
+        allowNull: false,
+      },
     },
-    row: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    {
+      sequelize,
+      modelName: 'Seat',
+      indexes: [
+        {
+          unique: true,
+          name: 'unique_airplane_seat_coordinate',
+          fields: ['airplaneId', 'row', 'col'],
+        },
+      ],
+      hooks: {
+        beforeValidate: (seat) => {
+          if (seat.col) {
+            seat.col = seat.col.trim().toUpperCase();
+          }
+        },
+      },
     },
-    col: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    type: {
-      type: DataTypes.ENUM,
-      values: [BUSINESS, ECONOMY, PREMIUM_ECONOMY, FIRST_CLASS],
-      defaultValue: ECONOMY,
-      allowNull: false
-    }
-  }, {
-    sequelize,
-    modelName: 'Seat',
-  });
+  );
+
   return Seat;
 };
