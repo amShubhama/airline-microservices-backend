@@ -1,25 +1,44 @@
 const express = require('express');
-
-const { AirportController } = require('../../controllers/index');
-const { AirportMiddlewares } = require('../../middlewares/index');
+const { AirportController } = require('../../controllers');
+const { AirportValidators, validateIdParam } = require('../../validators');
+const { requireAdmin } = require('../../middlewares/role-middleware');
 
 const router = express.Router();
 
-// /api/v1/airports POST
-router.post('/',
-    AirportMiddlewares.validateCreateRequest,
-    AirportController.createAirport);
+/**
+ * @route   GET /api/v1/airports
+ */
+router.get('/', AirportController.getAirports);
 
-// /api/v1/airports GET
-router.get('/',
-    AirportController.getAirports);
+/**
+ * @route   GET /api/v1/airports/code/:code
+ */
+router.get('/code/:code', AirportValidators.validateAirportCodeParam, AirportController.getAirportByCode);
 
-// /api/v1/airports/:id GET
-router.get('/:id',
-    AirportController.getAirport);
+/**
+ * @route   GET /api/v1/airports/:id
+ */
+router.get('/:id', validateIdParam, AirportController.getAirport);
 
-// /api/v1/airports/:id DELETE
-router.delete('/:id',
-    AirportController.destroyAirport);
+/**
+ * @route   POST /api/v1/airports
+ */
+router.post('/', requireAdmin, AirportValidators.validateCreateAirport, AirportController.createAirport);
+
+/**
+ * @route   PATCH /api/v1/airports/:id
+ */
+router.patch(
+  '/:id',
+  requireAdmin,
+  validateIdParam,
+  AirportValidators.validateUpdateAirport,
+  AirportController.updateAirport,
+);
+
+/**
+ * @route   DELETE /api/v1/airports/:id
+ */
+router.delete('/:id', requireAdmin, validateIdParam, AirportController.destroyAirport);
 
 module.exports = router;

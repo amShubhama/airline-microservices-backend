@@ -1,93 +1,72 @@
 const { StatusCodes } = require('http-status-codes');
+const { AirportService } = require('../services');
+const { successResponse } = require('../utils/common/response');
+const { MESSAGES } = require('../constants');
 
-const { AirportService } = require('../services/index');
-const { SuccessResponse, ErrorResponse } = require('../utils/common/index');
-
-/**
- * POST : /airports 
- * req-body {name: 'IGI', cityId: 5, code: 'DEL'}
- */
-async function createAirport(req, res) {
-    try {
-        const airport = await AirportService.createAirport({
-            name: req.body.name,
-            code: req.body.code,
-            address: req.body.address,
-            cityId: req.body.cityId
-        });
-        SuccessResponse.data = airport;
-        return res
-            .status(StatusCodes.CREATED)
-            .json(SuccessResponse);
-    } catch (error) {
-        ErrorResponse.error = error;
-        return res
-            .status(error.statusCode)
-            .json(ErrorResponse);
-    }
+async function createAirport(req, res, next) {
+  try {
+    const airport = await AirportService.createAirport({
+      name: req.body.name,
+      code: req.body.code,
+      address: req.body.address,
+      cityId: req.body.cityId,
+    });
+    return res.status(StatusCodes.CREATED).json(successResponse(MESSAGES.AIRPORT.CREATED, airport));
+  } catch (error) {
+    next(error);
+  }
 }
 
-
-/**
- * POST : /airports
- * req-body {}
- */
-async function getAirports(req, res) {
-    try {
-        const airports = await AirportService.getAirports();
-        SuccessResponse.data = airports;
-        return res
-            .status(StatusCodes.OK)
-            .json(SuccessResponse);
-    } catch (error) {
-        ErrorResponse.error = error;
-        return res
-            .status(error.statusCode)
-            .json(ErrorResponse);
-    }
+async function getAirports(req, res, next) {
+  try {
+    const airports = await AirportService.getAirports();
+    return res.status(StatusCodes.OK).json(successResponse(MESSAGES.AIRPORT.FETCHED_ALL, airports));
+  } catch (error) {
+    next(error);
+  }
 }
 
-/**
- * POST : /airports/:id 
- * req-body {}
- */
-async function getAirport(req, res) {
-    try {
-        const airports = await AirportService.getAirport(req.params.id);
-        SuccessResponse.data = airports;
-        return res
-            .status(StatusCodes.OK)
-            .json(SuccessResponse);
-    } catch (error) {
-        ErrorResponse.error = error;
-        return res
-            .status(error.statusCode)
-            .json(ErrorResponse);
-    }
+async function getAirport(req, res, next) {
+  try {
+    const airport = await AirportService.getAirport(req.params.id);
+    return res.status(StatusCodes.OK).json(successResponse(MESSAGES.AIRPORT.FETCHED, airport));
+  } catch (error) {
+    next(error);
+  }
 }
 
-/**
- * DELETE : /airports/:id
- * req-body {}
- */
-async function destroyAirport(req, res) {
-    try {
-        const response = await AirportService.destroyAirport(req.params.id);
-        SuccessResponse.data = response;
-        return res
-            .status(StatusCodes.OK)
-            .json(SuccessResponse);
-    } catch (error) {
-        ErrorResponse.error = error;
-        return res
-            .status(error.statusCode)
-            .json(ErrorResponse);
-    }
+async function getAirportByCode(req, res, next) {
+  try {
+    const airport = await AirportService.getAirportByCode(req.params.code);
+    return res.status(StatusCodes.OK).json(successResponse(MESSAGES.AIRPORT.FETCHED, airport));
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function updateAirport(req, res, next) {
+  try {
+    const airport = await AirportService.updateAirport(req.params.id, req.body);
+    return res.status(StatusCodes.OK).json(successResponse(MESSAGES.AIRPORT.UPDATED, airport));
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function destroyAirport(req, res, next) {
+  try {
+    const response = await AirportService.destroyAirport(req.params.id);
+    return res.status(StatusCodes.OK).json(successResponse(MESSAGES.AIRPORT.DELETED, response));
+  } catch (error) {
+    next(error);
+  }
 }
 
 module.exports = {
-    createAirport,
-    getAirports,
-    getAirport,
-    destroyAirport
-}
+  createAirport,
+  getAirports,
+  getAirport,
+  getAirportByCode,
+  updateAirport,
+  destroyAirport,
+};

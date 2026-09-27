@@ -1,25 +1,19 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+const app = require('./app');
+const { PORT } = require('./config/server-config');
+const db = require('./models/index');
 
-const { PORT } = require('./config/serverConfig');
-const ApiRoutes = require('./routes/index');
-const db = require('./models/index.js');
 const setupAndStartServer = async () => {
-
-    // create the express object
-    const app = express();
-
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
-
-    app.use('/api', ApiRoutes);
-
+  try {
     app.listen(PORT, async () => {
-        console.log(`Flight Service is running on port ${PORT}`);
-        if (process.env.DB_SYNC) {
-            //db.sequelize.sync({ alter: true });
-        }
-    })
-}
+      console.log(`Flight Service is running on port ${PORT}`);
+      if (process.env.DB_SYNC) {
+        await db.sequelize.sync({ alter: true });
+      }
+    });
+  } catch (error) {
+    console.error('Failed to start Flight Service:', error);
+    process.exit(1);
+  }
+};
 
 setupAndStartServer();

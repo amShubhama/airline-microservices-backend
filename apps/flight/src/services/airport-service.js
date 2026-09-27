@@ -1,63 +1,83 @@
 const { StatusCodes } = require('http-status-codes');
-
-const { AirportRepository } = require('../repositories/index');
-const AppError = require('../utils/errors/app-error');
-
+const { AirportRepository, CityRepository } = require('../repositories');
+const { AppError } = require('../utils/errors');
+const { MESSAGES } = require('../constants');
 
 const airportRepository = new AirportRepository();
+const cityRepository = new CityRepository();
 
-async function createAirport(data) {
-    try {
-        const airport = await airportRepository.create(data);
-        return airport;
-    } catch (error) {
-        if (error.name == 'SequelizeValidationError') {
-            let explanation = [];
-            error.errors.forEach((err) => {
-                explanation.push(err.message);
-            });
-            throw new AppError(explanation, StatusCodes.BAD_REQUEST);
-        }
-        throw new AppError('Cannot create a new Airport object', StatusCodes.INTERNAL_SERVER_ERROR);
+class AirportService {
+  async createAirport(data) {
+    const city = await cityRepository.get(data.cityId);
+    if (!city) {
+      throw new AppError(MESSAGES.CITY.NOT_FOUND, StatusCodes.NOT_FOUND, `City with id ${data.cityId} does not exist`);
     }
-}
 
-async function getAirports() {
-    try {
-        const airports = await airportRepository.getAll();
-        return airports;
-    } catch (error) {
-        throw new AppError('Cannot fetch data of all the airports', StatusCodes.INTERNAL_SERVER_ERROR);
+    return await airportRepository.create({
+      name: data.name,
+      code: data.code,
+      address: data.address ?? null,
+      cityId: data.cityId,
+    });
+  }
+
+  async getAirports() {
+    return await airportRepository.getAll({
+      order: [['code', 'ASC']],
+    });
+  }
+
+  async getAirport(id) {
+    const airport = await airportRepository.get(id);
+    if (!airport) {
+      throw new AppError(MESSAGES.AIRPORT.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.AIRPORT.NOT_FOUND);
     }
-}
+    return airport;
+  }
 
-async function getAirport(id) {
-    try {
-        const airport = await airportRepository.get(id);
-        return airport;
-    } catch (error) {
-        if (error.statusCode == StatusCodes.NOT_FOUND) {
-            throw new AppError('The airport you requested is not present', error.statusCode);
-        }
-        throw new AppError('Cannot fetch data of all the airport', StatusCodes.INTERNAL_SERVER_ERROR);
+  async getAirportByCode(code) {
+    const airport = await airportRepository.findByCode(code);
+    if (!airport) {
+      throw new AppError(MESSAGES.AIRPORT.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.AIRPORT.NOT_FOUND);
     }
-}
+    return airport;
+  }
 
-async function destroyAirport(id) {
-    try {
-        const response = await airportRepository.destroy(id);
-        return response;
-    } catch (error) {
-        if (error.statusCode == StatusCodes.NOT_FOUND) {
-            throw new AppError('The airport you requested to delete is not present', error.statusCode);
-        }
-        throw new AppError('Cannot destroy the airport', StatusCodes.INTERNAL_SERVER_ERROR);
+  async updateAirport(id, data) {
+    const airport = await airportRepository.get(id);
+    if (!airport) {
+      throw new AppError(MESSAGES.AIRPORT.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.AIRPORT.NOT_FOUND);
     }
+    if (data.cityId) {
+      const city = await cityRepository.get(data.cityId);
+      if (!city) {
+        throw new AppError(
+          MESSAGES.CITY.NOT_FOUND,
+          StatusCodes.NOT_FOUND,
+          `City with id ${data.cityId} does not exist`,
+        );
+      }
+    }
+    return await airportRepository.update(airport, data);
+  }
+
+  async destroyAirport(id) {
+    const airport = await airportRepository.get(id);
+    if (!airport) {
+      throw new AppError(MESSAGES.AIRPORT.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.AIRPORT.NOT_FOUND);
+    }
+
+    const hasFlights = await airportRepository.hasFlights(airport.code);
+    if (hasFlights) {
+      throw new AppError(
+        'Cannot delete airport with scheduled flights',
+        StatusCodes.BAD_REQUEST,
+        `Airport '${airport.code}' cannot be deleted because it is referenced by existing or scheduled flights`,
+      );
+    }
+
+    return await airportRepository.destroy(id);
+  }
 }
 
-module.exports = {
-    createAirport,
-    getAirports,
-    getAirport,
-    destroyAirport
-}
+module.exports = AirportService;
