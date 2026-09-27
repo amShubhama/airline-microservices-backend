@@ -57,6 +57,15 @@ module.exports = [
     },
   },
   {
-    ignores: ['**/node_modules/**', '**/coverage/**', '**/dist/**', '**/build/**', '**/.husky/**', 'package-lock.json'],
+    ignores: [
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/.husky/**',
+      'package-lock.json',
+      'apps/booking/**',
+      'apps/notifications/**',
+    ],
   },
 ];
