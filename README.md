@@ -61,13 +61,13 @@ The architecture enforces single-responsibility microservices behind an API Gate
 
 ## Microservices Directory & Status
 
-| Service                  | Workspace                | Port   | Domain Responsibility                                               | Status                 | Documentation & Specs                                                                                                                     |
-| :----------------------- | :----------------------- | :----- | :------------------------------------------------------------------ | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| **API Gateway**          | `@airline/api-gateway`   | `3000` | Reverse proxy routing, endpoint aggregation, request forwarding     | Active                 | [`apps/api-gateway`](./apps/api-gateway)                                                                                                  |
-| **Auth Service**         | `@airline/auth`          | `3001` | User identity, password encryption, JWT issuance/verification, RBAC | **Completed & Tested** | [Service README](./apps/auth/README.md) \| [API Specs](./apps/auth/API_DOCUMENTATION.md) \| [Testing Guide](./apps/auth/tests/TESTING.md) |
-| **Flight Service**       | `@airline/flight`        | `3002` | Manages airports, airplanes, cities, flights, and seat inventories  | Active                 | [`apps/flight`](./apps/flight)                                                                                                            |
-| **Booking Service**      | `@airline/booking`       | `3003` | Seat reservations, booking lifecycles, and transaction processing   | Active                 | [`apps/booking`](./apps/booking)                                                                                                          |
-| **Notification Service** | `@airline/notifications` | `3004` | Asynchronous email dispatch and scheduled ticket tasks via RabbitMQ | Active                 | [`apps/notifications`](./apps/notifications)                                                                                              |
+| Service                  | Workspace                | Port   | Domain Responsibility                                               | Status                 | Documentation & Specs                                                                                                                           |
+| :----------------------- | :----------------------- | :----- | :------------------------------------------------------------------ | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **API Gateway**          | `@airline/api-gateway`   | `3000` | Reverse proxy routing, endpoint aggregation, request forwarding     | Active                 | [`apps/api-gateway`](./apps/api-gateway)                                                                                                        |
+| **Auth Service**         | `@airline/auth`          | `3001` | User identity, password encryption, JWT issuance/verification, RBAC | **Completed & Tested** | [Service README](./apps/auth/README.md) \| [API Specs](./apps/auth/API_DOCUMENTATION.md) \| [Testing Guide](./apps/auth/tests/TESTING.md)       |
+| **Flight Service**       | `@airline/flight`        | `3002` | Manages airports, airplanes, cities, flights, and seat inventories  | **Completed & Tested** | [Service README](./apps/flight/README.md) \| [API Specs](./apps/flight/API_DOCUMENTATION.md) \| [Testing Guide](./apps/flight/tests/TESTING.md) |
+| **Booking Service**      | `@airline/booking`       | `3003` | Seat reservations, booking lifecycles, and transaction processing   | Active                 | [`apps/booking`](./apps/booking)                                                                                                                |
+| **Notification Service** | `@airline/notifications` | `3004` | Asynchronous email dispatch and scheduled ticket tasks via RabbitMQ | Active                 | [`apps/notifications`](./apps/notifications)                                                                                                    |
 
 ---
 
@@ -115,6 +115,22 @@ The **Auth Service** is the central security and identity provider for the platf
 - **Enterprise Test Suite:** 14 test suites and 99 automated tests passing with 99.64% line coverage.
 
 _For complete architecture breakdown, database schema, and endpoint documentation, refer to the [**Auth Service README**](./apps/auth/README.md)._
+
+---
+
+## Service Highlight: Flight Microservice (`@airline/flight`)
+
+The **Flight Service** is the central flight inventory and route scheduling backbone of the platform. It provides high-performance flight querying, fleet management, airport/city mapping, and high-concurrency seat inventory management.
+
+### Highlights
+
+- **Layered Clean Architecture:** Routes $\rightarrow$ Middlewares $\rightarrow$ Controllers $\rightarrow$ Services $\rightarrow$ Repositories $\rightarrow$ Models.
+- **Pessimistic Row Locking (`SELECT ... FOR UPDATE`):** Guarantees zero overselling race conditions during concurrent seat reservations within database transactions.
+- **Multi-Factor Search & Query Engine:** Filters flights across origin-destination pairs (`trips`), pricing windows, available seat counts (`travellers`), specific dates (`tripDate`), and multi-column sorting.
+- **Defensive Domain Integrity:** Automated validation preventing overlapping flight schedules for the same aircraft, identical departure/arrival airports, chronological time violations, and unsafe capacity reductions.
+- **Enterprise Test Suite:** 27 test suites and 239 automated tests passing with 94.75% line coverage.
+
+_For complete architecture breakdown, database schema, and endpoint documentation, refer to the [**Flight Service README**](./apps/flight/README.md), [**Flight API Documentation**](./apps/flight/API_DOCUMENTATION.md), and [**Flight Testing Guide**](./apps/flight/tests/TESTING.md)._
 
 ---
 
@@ -283,7 +299,15 @@ AirlineManagement/
     │   └── tests/                          # Automated test suites & TESTING.md
     │
     ├── booking/                            # Booking & Reservation Service (:3003)
+    │
     ├── flight/                             # Flight & Inventory Service (:3002)
+    │   ├── API_DOCUMENTATION.md            # Flight REST API contract & endpoints
+    │   ├── README.md                       # Flight service architecture & setup
+    │   ├── jest.config.js                  # Flight-specific Jest configuration
+    │   ├── package.json                    # Flight dependencies & test scripts
+    │   ├── src/                            # Application source code
+    │   └── tests/                          # Automated test suites & TESTING.md
+    │
     └── notifications/                      # Message consumer & Email Service (:3004)
 ```
 
