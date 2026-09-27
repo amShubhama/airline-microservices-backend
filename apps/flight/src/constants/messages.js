@@ -1,0 +1,68 @@
+const MESSAGES = Object.freeze({
+  AIRPLANE: {
+    CREATED: 'Successfully created the airplane',
+    FETCHED: 'Successfully fetched airplane details',
+    FETCHED_ALL: 'Successfully fetched all airplanes',
+    UPDATED: 'Successfully updated the airplane',
+    DELETED: 'Successfully deleted the airplane',
+    NOT_FOUND: 'The requested airplane was not found',
+    ALREADY_EXISTS: 'Airplane with this model number already exists',
+    CAPACITY_BELOW_SEATS: 'Cannot reduce airplane capacity below configured seat count',
+    CAPACITY_BELOW_BOOKINGS: 'Cannot reduce airplane capacity below existing flight bookings',
+  },
+  AIRPORT: {
+    CREATED: 'Successfully created the airport',
+    FETCHED: 'Successfully fetched airport details',
+    FETCHED_ALL: 'Successfully fetched all airports',
+    UPDATED: 'Successfully updated the airport',
+    DELETED: 'Successfully deleted the airport',
+    NOT_FOUND: 'The requested airport was not found',
+    ALREADY_EXISTS: 'Airport with this code or name already exists',
+  },
+  CITY: {
+    CREATED: 'Successfully created the city',
+    FETCHED: 'Successfully fetched city details',
+    FETCHED_ALL: 'Successfully fetched all cities',
+    UPDATED: 'Successfully updated the city',
+    DELETED: 'Successfully deleted the city',
+    NOT_FOUND: 'The requested city was not found',
+    ALREADY_EXISTS: 'City with this name already exists',
+  },
+  FLIGHT: {
+    CREATED: 'Successfully scheduled the flight',
+    FETCHED: 'Successfully fetched flight details',
+    FETCHED_ALL: 'Successfully fetched all flights',
+    UPDATED: 'Successfully updated the flight',
+    DELETED: 'Successfully cancelled the flight',
+    SEATS_UPDATED: 'Successfully updated flight seat availability',
+    NOT_FOUND: 'The requested flight was not found',
+    INSUFFICIENT_SEATS: 'Not enough seats available on this flight',
+    SAME_AIRPORTS: 'Departure and arrival airports cannot be identical',
+    INVALID_TIME: 'Arrival time must be strictly later than departure time',
+    SCHEDULE_OVERLAP: 'Airplane is already scheduled on another flight during this timeframe',
+  },
+  SEAT: {
+    CREATED: 'Successfully created the seat',
+    BATCH_CREATED: 'Successfully created seats for the airplane',
+    FETCHED_ALL: 'Successfully fetched seats for the airplane',
+    NOT_FOUND: 'The requested seat was not found',
+    ALREADY_EXISTS: 'Seat already exists at this row and column for the aircraft',
+    CAPACITY_EXCEEDED: 'Total seats exceed airplane capacity',
+  },
+  VALIDATION: {
+    VALIDATION_ERROR: 'Validation failed for request data',
+    REQUIRED_FIELD: (field) => `${field} is required`,
+    INVALID_FORMAT: (field) => `${field} is invalid or in an incorrect format`,
+  },
+  AUTH: {
+    UNAUTHORIZED: 'Authentication required. Missing or invalid user identity headers.',
+    FORBIDDEN_ADMIN: 'Forbidden. Admin privileges are required to perform this action.',
+  },
+  SYSTEM: {
+    INTERNAL_SERVER_ERROR: 'An unexpected internal server error occurred',
+    NOT_FOUND: 'Requested resource not found',
+    DB_ERROR: 'Database operation failed',
+  },
+});
+
+module.exports = MESSAGES;
