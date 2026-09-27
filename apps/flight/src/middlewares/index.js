@@ -1,6 +1,7 @@
+const errorHandler = require('./error-middleware');
+const { requireAdmin } = require('./role-middleware');
+
 module.exports = {
-    AirplaneMiddlewares: require('./airplane-middlewares'),
-    CityMiddlewares: require('./city-middlewares'),
-    AirportMiddlewares: require('./airport-middlewares'),
-    FlightMiddlewares: require('./flight-middlewares')
-}
+  errorHandler,
+  requireAdmin,
+};

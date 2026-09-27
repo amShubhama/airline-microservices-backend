@@ -1,26 +1,53 @@
 const { StatusCodes } = require('http-status-codes');
-
-const { CityRepository } = require('../repositories/index');
-const AppError = require('../utils/errors/app-error');
+const { CityRepository } = require('../repositories');
+const { AppError } = require('../utils/errors');
+const { MESSAGES } = require('../constants');
 
 const cityRepository = new CityRepository();
 
-async function createCity(data) {
-    try {
-        const city = await cityRepository.create(data);
-        return city;
-    } catch (error) {
-        if (error.name == 'SequelizeValidationError' || error.name == 'SequelizeUniqueConstraintError') {
-            let explanation = [];
-            error.errors.forEach((err) => {
-                explanation.push(err.message);
-            });
-            throw new AppError(explanation, StatusCodes.BAD_REQUEST);
-        }
-        throw new AppError('Cannot create a new city object', StatusCodes.INTERNAL_SERVER_ERROR);
+class CityService {
+  async createCity(data) {
+    return await cityRepository.create({ name: data.name });
+  }
+
+  async getCities() {
+    return await cityRepository.getAll({
+      order: [['name', 'ASC']],
+    });
+  }
+
+  async getCity(id) {
+    const city = await cityRepository.getWithAirports(id);
+    if (!city) {
+      throw new AppError(MESSAGES.CITY.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.CITY.NOT_FOUND);
     }
+    return city;
+  }
+
+  async updateCity(id, data) {
+    const city = await cityRepository.get(id);
+    if (!city) {
+      throw new AppError(MESSAGES.CITY.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.CITY.NOT_FOUND);
+    }
+    return await cityRepository.update(city, { name: data.name });
+  }
+
+  async destroyCity(id) {
+    const city = await cityRepository.getWithAirports(id);
+    if (!city) {
+      throw new AppError(MESSAGES.CITY.NOT_FOUND, StatusCodes.NOT_FOUND, MESSAGES.CITY.NOT_FOUND);
+    }
+
+    if (city.airports && city.airports.length > 0) {
+      throw new AppError(
+        'Cannot delete city with registered airports',
+        StatusCodes.BAD_REQUEST,
+        `City '${city.name}' cannot be deleted because it has ${city.airports.length} registered airport(s). Delete or reassign airports first.`,
+      );
+    }
+
+    return await cityRepository.destroy(id);
+  }
 }
 
-module.exports = {
-    createCity
-}
+module.exports = CityService;
