@@ -1,51 +1,72 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Airport extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
       this.belongsTo(models.City, {
         foreignKey: 'cityId',
+        as: 'city',
+        onDelete: 'RESTRICT',
       });
       this.hasMany(models.Flight, {
-        foreignKey: 'departureAirportId',
-        onDelete: 'CASCADE'
+        foreignKey: 'departureAirportCode',
+        sourceKey: 'code',
+        as: 'departingFlights',
+        onDelete: 'RESTRICT',
       });
       this.hasMany(models.Flight, {
-        foreignKey: 'arrivalAirportId',
-        onDelete: 'CASCADE'
+        foreignKey: 'arrivalAirportCode',
+        sourceKey: 'code',
+        as: 'arrivingFlights',
+        onDelete: 'RESTRICT',
       });
     }
   }
-  Airport.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+
+  Airport.init(
+    {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      code: {
+        type: DataTypes.STRING(3),
+        allowNull: false,
+        unique: true,
+        validate: {
+          isUppercase: true,
+          len: [3, 3],
+        },
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      cityId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: true,
+        },
+      },
     },
-    code: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+    {
+      sequelize,
+      modelName: 'Airport',
+      hooks: {
+        beforeValidate: (airport) => {
+          if (airport.code) {
+            airport.code = airport.code.trim().toUpperCase();
+          }
+        },
+      },
     },
-    address: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-    cityId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    }
-  }, {
-    sequelize,
-    modelName: 'Airport',
-  });
+  );
+
   return Airport;
 };
