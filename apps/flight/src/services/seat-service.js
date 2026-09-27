@@ -2,7 +2,6 @@ const { StatusCodes } = require('http-status-codes');
 const { SeatRepository, AirplaneRepository } = require('../repositories');
 const { AppError } = require('../utils/errors');
 const { MESSAGES } = require('../constants');
-const { SEAT_TYPE } = require('../utils/common/enums');
 
 const seatRepository = new SeatRepository();
 const airplaneRepository = new AirplaneRepository();

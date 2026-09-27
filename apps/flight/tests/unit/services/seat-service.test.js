@@ -1,7 +1,6 @@
 const { SeatService } = require('../../../src/services');
 const { SeatRepository, AirplaneRepository } = require('../../../src/repositories');
 const { AppError } = require('../../../src/utils/errors');
-const { MESSAGES } = require('../../../src/constants');
 const { SEAT_TYPE } = require('../../../src/utils/common/enums');
 
 describe('SeatService', () => {
