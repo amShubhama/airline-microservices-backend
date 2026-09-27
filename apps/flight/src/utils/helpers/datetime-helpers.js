@@ -1,9 +1,7 @@
-function compareTime(timeString1, timeString2) {
-    let dateTime1 = new Date(timeString1);
-    let dateTime2 = new Date(timeString2);
-    return dateTime1.getTime() > dateTime2.getTime();
+function compareTime(time1, time2) {
+  const d1 = new Date(time1);
+  const d2 = new Date(time2);
+  return d1.getTime() > d2.getTime();
 }
 
-module.exports = {
-    compareTime
-}
+module.exports = compareTime;

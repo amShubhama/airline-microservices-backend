@@ -1,4 +1,7 @@
+const compareTime = require('./datetime-helpers');
+const validateDifferentAirports = require('./validate-different-airports');
+
 module.exports = {
-    compareTime: require("./datetime-helpers"),
-    validateDifferentAirports: require("./validate-different-airports"),
-}
+  compareTime,
+  validateDifferentAirports,
+};
